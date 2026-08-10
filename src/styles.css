@@ -686,9 +686,23 @@ label input {
 }
 .compare-content select {
   width: 100%;
+  padding: 7px 26px 7px 8px;
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(114, 187, 148, 0.32);
+  border: 1px solid rgba(114, 187, 148, 0.38);
+  border-radius: 0;
+  background: #04291d;
+  color: #ecfff3;
+  color-scheme: dark;
   font-size: 11px;
+}
+.compare-content select:focus {
+  outline: 1px solid #8ee7b5;
+  outline-offset: 2px;
+}
+.compare-content select option {
+  background: #04291d;
+  color: #ecfff3;
 }
 .compare-stats { display: none; }
 .compare-stats b,
