@@ -65,6 +65,15 @@ type SavedView = {
   query: string;
   period: string;
 };
+type DirectFigure = {
+  key: string;
+  label: string;
+  value: number;
+  valueText: string;
+  sourcePage: number;
+  reportTitle: string;
+  period: string;
+};
 const toQuarter = (month: string) => {
   const quarterMatch = month.match(/^(\d{4})-Q([1-4])$/);
   if (quarterMatch) return `${quarterMatch[1]} Q${quarterMatch[2]}`;
@@ -278,13 +287,88 @@ export default function App() {
     () => Array.from(new Set((catalog?.reports ?? []).map((report) => report.market))).sort(),
     [catalog],
   );
+  const comparisonScope = useMemo(() => {
+    if (!compareMarket || !catalog) return { name: "", reports: [] as Report[] };
+    return {
+      name: compareMarket,
+      reports: catalog.reports.filter((report) => report.market === compareMarket),
+    };
+  }, [catalog, compareMarket]);
+  const comparisonTrend = useMemo(
+    () => quarters.map((quarter) => ({
+      quarter,
+      selected: selectedScope.reports.filter((report) => toQuarter(report.period) === quarter).length,
+      compared: comparisonScope.reports.filter((report) => toQuarter(report.period) === quarter).length,
+    })),
+    [comparisonScope, quarters, selectedScope],
+  );
   const compareSnapshot = useMemo(() => {
-    if (!compareMarket || !catalog) return null;
-    const comparisonReports = catalog.reports.filter((report) => report.market === compareMarket);
-    const current = comparisonReports.filter((report) => toQuarter(report.period) === period).length;
-    const direct = comparisonReports.filter((report) => extractedReportIds.has(report.id)).length;
-    return { reports: comparisonReports.length, current, direct, quarters: new Set(comparisonReports.map((report) => toQuarter(report.period))).size };
-  }, [catalog, compareMarket, extractedReportIds, period]);
+    if (!comparisonScope.reports.length) return null;
+    const current = comparisonScope.reports.filter((report) => toQuarter(report.period) === period).length;
+    const direct = comparisonScope.reports.filter((report) => extractedReportIds.has(report.id)).length;
+    return {
+      reports: comparisonScope.reports.length,
+      current,
+      direct,
+      quarters: new Set(comparisonScope.reports.map((report) => toQuarter(report.period))).size,
+      propertyTypes: new Set(comparisonScope.reports.flatMap((report) => report.propertyTypes)).size,
+    };
+  }, [comparisonScope, extractedReportIds, period]);
+  const comparisonMix = useMemo(() => {
+    if (!compareSnapshot) return [];
+    const countTypes = (scope: Report[]) => scope.reduce<Record<string, number>>((counts, report) => {
+      report.propertyTypes.forEach((type) => { counts[type] = (counts[type] ?? 0) + 1; });
+      return counts;
+    }, {});
+    const selectedTypes = countTypes(selectedScope.reports);
+    const comparedTypes = countTypes(comparisonScope.reports);
+    return Array.from(new Set([...Object.keys(selectedTypes), ...Object.keys(comparedTypes)]))
+      .map((type) => ({ type, selected: selectedTypes[type] ?? 0, compared: comparedTypes[type] ?? 0 }))
+      .sort((a, b) => (b.selected + b.compared) - (a.selected + a.compared))
+      .slice(0, 4);
+  }, [compareSnapshot, comparisonScope, selectedScope]);
+  const comparableFigures = useMemo(() => {
+    if (!selected || !comparisonScope.reports.length) return { figures: [] as Array<{ label: string; selected: DirectFigure; compared: DirectFigure; change: number | null }>, selectedReport: null as Report | null, comparedReport: null as Report | null };
+    const pickDirectReport = (scope: Report[], preferred?: Report) => {
+      if (preferred && extractedReportIds.has(preferred.id)) return preferred;
+      const direct = scope.filter((report) => extractedReportIds.has(report.id));
+      return direct.find((report) => toQuarter(report.period) === period)
+        ?? [...direct].sort((a, b) => b.period.localeCompare(a.period))[0]
+        ?? null;
+    };
+    const selectedReport = pickDirectReport(selectedScope.reports, selected);
+    const comparedReport = pickDirectReport(comparisonScope.reports);
+    if (!selectedReport?.localPdf || !comparedReport?.localPdf) return { figures: [], selectedReport, comparedReport };
+    const toFigureMap = (report: Report) => {
+      const figures = observationsBySource.get(report.localPdf ?? "") ?? [];
+      return figures.reduce<Map<string, DirectFigure>>((map, observation) => {
+        const key = `${metricFamily(observation.metric)}|${observation.unit ?? ""}|${observation.currency ?? ""}`;
+        if (!map.has(key)) map.set(key, {
+          key,
+          label: normalizedMetricLabel(observation),
+          value: observation.value,
+          valueText: observation.value_text || `${observation.value} ${observation.unit}`,
+          sourcePage: observation.source_page,
+          reportTitle: report.title,
+          period: toQuarter(report.period),
+        });
+        return map;
+      }, new Map<string, DirectFigure>());
+    };
+    const selectedFigures = toFigureMap(selectedReport);
+    const comparedFigures = toFigureMap(comparedReport);
+    const figures = Array.from(selectedFigures.entries())
+      .filter(([key]) => comparedFigures.has(key))
+      .slice(0, 4)
+      .map(([, selectedFigure]) => {
+        const comparedFigure = comparedFigures.get(selectedFigure.key)!;
+        const change = selectedFigure.value === 0
+          ? null
+          : ((comparedFigure.value - selectedFigure.value) / Math.abs(selectedFigure.value)) * 100;
+        return { label: selectedFigure.label, selected: selectedFigure, compared: comparedFigure, change };
+      });
+    return { figures, selectedReport, comparedReport };
+  }, [comparisonScope, extractedReportIds, observationsBySource, period, selected, selectedScope]);
   const selectedPreview = useMemo<ReportPreview | null>(() => {
     if (!selected || !catalog) return null;
 
@@ -364,6 +448,9 @@ export default function App() {
     (peak, signal) => signal.count > peak.count ? signal : peak,
     quarterSignals[0] ?? { quarter: period, count: 0, strength: 0 },
   ).quarter;
+  const selectedCurrentReports = selectedTrend.find((item) => item.quarter === period)?.count ?? 0;
+  const comparisonChartMax = Math.max(...comparisonTrend.flatMap((item) => [item.selected, item.compared]), 1);
+  const comparisonMixMax = Math.max(...comparisonMix.flatMap((item) => [item.selected, item.compared]), 1);
   const presetViews: SavedView[] = [
     { name: "US Office", region: "Americas", sector: "Office", month: "All", query: "", period },
     { name: "Europe Logistics", region: "Europe", sector: "Industrial and Logistics", month: "All", query: "", period },
@@ -592,18 +679,72 @@ export default function App() {
             </button>
             {compareOpen && (
               <div className="compare-content">
+                <p className="compare-kicker">COMPARE AGAINST A MARKET</p>
                 <select value={compareMarket} onChange={(event) => setCompareMarket(event.target.value)} aria-label="Compare market">
                   <option value="">Select a market</option>
                   {marketOptions.filter((market) => market !== selected.market).map((market) => <option key={market}>{market}</option>)}
                 </select>
-                {compareSnapshot && (
+                {compareSnapshot && (<>
                   <div className="compare-stats">
                     <b>{compareMarket}</b>
                     <span>{compareSnapshot.current} reports in {period}</span>
                     <span>{compareSnapshot.reports} indexed · {compareSnapshot.quarters} quarters</span>
                     <span>{compareSnapshot.direct} direct-figure reports</span>
                   </div>
-                )}
+                  <div className="compare-intro">
+                    <b>{selectedScope.name} <span>vs</span> {compareMarket}</b>
+                    <small>
+                      {compareSnapshot.current === selectedCurrentReports
+                        ? `Both markets have ${compareSnapshot.current} reports in ${period}.`
+                        : `${compareMarket} has ${Math.abs(compareSnapshot.current - selectedCurrentReports)} report${Math.abs(compareSnapshot.current - selectedCurrentReports) === 1 ? "" : "s"} ${compareSnapshot.current > selectedCurrentReports ? "more" : "fewer"} than ${selectedScope.name} in ${period}.`}
+                    </small>
+                  </div>
+                  <div className="compare-scorecards">
+                    <div><span>ACTIVE PERIOD</span><b>{selectedCurrentReports} <i>vs</i> {compareSnapshot.current}</b><small>{period}</small></div>
+                    <div><span>RESEARCH DEPTH</span><b>{selectedScope.reports.length} <i>vs</i> {compareSnapshot.reports}</b><small>indexed reports</small></div>
+                    <div><span>DIRECT FIGURES</span><b>{selectedScope.reports.filter((report) => extractedReportIds.has(report.id)).length} <i>vs</i> {compareSnapshot.direct}</b><small>source-linked reports</small></div>
+                  </div>
+                  <section className="comparison-chart" aria-label="Report volume by quarter">
+                    <div className="comparison-heading"><span>REPORT VOLUME BY QUARTER</span><small><i className="legend-primary" /> {selectedScope.name} <i className="legend-compare" /> {compareMarket}</small></div>
+                    <div className="comparison-bars">
+                      {comparisonTrend.map((item) => (
+                        <div className={`comparison-column ${item.quarter === period ? "active" : ""}`} key={item.quarter} title={`${item.quarter}: ${selectedScope.name} ${item.selected} · ${compareMarket} ${item.compared}`}>
+                          <span className="primary" style={{ "--comparison-height": `${Math.max(2, (item.selected / comparisonChartMax) * 38)}px` } as CSSProperties} />
+                          <span className="compared" style={{ "--comparison-height": `${Math.max(2, (item.compared / comparisonChartMax) * 38)}px` } as CSSProperties} />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="comparison-axis"><span>{comparisonTrend.at(0)?.quarter}</span><b>ACTIVE: {period}</b><span>{comparisonTrend.at(-1)?.quarter}</span></div>
+                  </section>
+                  <section className="comparison-mix" aria-label="Property type coverage">
+                    <div className="comparison-heading"><span>PROPERTY TYPE COVERAGE</span><small>catalog reports</small></div>
+                    {comparisonMix.map((item) => (
+                      <div className="mix-row" key={item.type}>
+                        <span>{item.type}</span>
+                        <div><i className="primary" style={{ "--mix-width": `${(item.selected / comparisonMixMax) * 100}%` } as CSSProperties} /><i className="compared" style={{ "--mix-width": `${(item.compared / comparisonMixMax) * 100}%` } as CSSProperties} /></div>
+                        <b>{item.selected} <small>vs</small> {item.compared}</b>
+                      </div>
+                    ))}
+                  </section>
+                  <section className="comparable-figures" aria-label="Comparable extracted figures">
+                    <div className="comparison-heading"><span>LIKE-FOR-LIKE DIRECT FIGURES</span><small>same metric and unit only</small></div>
+                    {comparableFigures.figures.length ? (
+                      <div className="figure-compare-grid">
+                        {comparableFigures.figures.map((figure) => (
+                          <div key={figure.label}>
+                            <span>{figure.label}</span>
+                            <b>{figure.selected.valueText} <i>vs</i> {figure.compared.valueText}</b>
+                            <small>{figure.selected.period} p.{figure.selected.sourcePage} <em>·</em> {figure.compared.period} p.{figure.compared.sourcePage}</small>
+                            {figure.change !== null && <strong className={figure.change > 0 ? "up" : figure.change < 0 ? "down" : "flat"}>{figure.change > 0 ? "+" : ""}{figure.change.toFixed(1)}% in {compareMarket}</strong>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="comparison-empty">No comparable direct figures are available yet. Values only appear here when the two selected reports share the same metric family, unit, and currency.</p>
+                    )}
+                  </section>
+                  <p className="comparison-provenance">Coverage is catalog-based. Direct figures are only shown when source-linked extracts are compatible.</p>
+                </>)}
               </div>
             )}
           </section>
