@@ -123,7 +123,7 @@ export default function App() {
     [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
   const selected = selection?.reports[selection.index] ?? null;
   useEffect(() => {
-    fetch("/data/catalog.json")
+    fetch(`${import.meta.env.BASE_URL}data/catalog.json`)
       .then((r) => r.json())
       .then((d: Catalog) => {
         setCatalog(d);
@@ -146,7 +146,7 @@ export default function App() {
     if (savedViewsLoaded) window.localStorage.setItem("cbre-atlas-saved-views", JSON.stringify(savedViews));
   }, [savedViews, savedViewsLoaded]);
   useEffect(() => {
-    fetch("/data/observations.json")
+    fetch(`${import.meta.env.BASE_URL}data/observations.json`)
       .then((r) => (r.ok ? r.json() : []))
       .then(setObservations)
       .catch(() => setObservations([]));
