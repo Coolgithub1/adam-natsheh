@@ -476,6 +476,7 @@ export default function App() {
           <button className="close" onClick={() => setSelection(null)} aria-label="Clear selected report">
             <X size={18} />
           </button>
+          <p className="scroll-cue" aria-hidden="true">SCROLL FOR MORE <span>↓</span></p>
           <p className="eyebrow">
             <MapPin size={13} />
             {selected.market.toUpperCase()}

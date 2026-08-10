@@ -384,13 +384,55 @@ label input {
   display: flex;
   flex-direction: column;
   height: auto;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: #8ee7b5 #062b20;
   background: rgba(1, 42, 30, 0.96);
   border-color: rgba(169, 220, 191, 0.33);
   box-shadow: none;
 }
 .detail.has-selection {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.detail::-webkit-scrollbar {
+  width: 13px;
+}
+.detail::-webkit-scrollbar-track {
+  background: #062b20;
+  border-left: 1px solid rgba(126, 226, 174, 0.25);
+}
+.detail::-webkit-scrollbar-thumb {
+  min-height: 52px;
+  border: 3px solid #062b20;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #b1f2d0, #00a65a);
+  box-shadow: 0 0 10px rgba(0, 166, 90, 0.72);
+}
+.detail::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #e7fff1, #28ce7a);
+}
+.scroll-cue {
+  position: absolute;
+  top: 16px;
+  right: 42px;
+  margin: 0;
+  color: #8ee7b5;
+  font: 8px "DM Mono";
+  letter-spacing: 0.1em;
+  opacity: 0.88;
+}
+.scroll-cue span {
+  display: inline-block;
+  margin-left: 3px;
+  color: #eafff1;
+  animation: scroll-cue-bob 1.25s ease-in-out infinite;
+}
+@keyframes scroll-cue-bob {
+  50% { transform: translateY(3px); }
 }
 .detail:after {
   display: none;
