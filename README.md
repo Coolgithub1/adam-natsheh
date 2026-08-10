@@ -1,50 +1,69 @@
 # CBRE Market Atlas
 
-An interactive globe and timeline for the supplied CBRE market-report library. It begins with the 2,223-report CSV catalog and adds page-cited numeric observations through a resumable Gemini extraction process.
+Interactive market-intelligence dashboard for exploring the CBRE research catalog by location, property type, and reporting period.
 
-## Run the atlas
+**Live site:** [coolgithub1.github.io/cbre-market-atlas](https://coolgithub1.github.io/cbre-market-atlas/)
+
+## What it does
+
+- Maps report activity as interactive market signals on a dark, vector-style world map.
+- Filters by region, property type, month, saved views, and search term.
+- Uses a quarter-based timeline; report volume controls the timeline-marker glow.
+- Opens a signal dock with report tabs, extracted figures, source-page links, market pulse, a volume trend, and market comparison.
+- Keeps the report dock visibly scrollable when a figure-rich report or comparison needs more room.
+
+## Run locally
 
 ```powershell
-npm install
-npm run catalog
+npm ci
 npm run dev
 ```
 
-Open the local URL shown by Vite. `npm run build` produces the deployable client in `dist/`.
-
-The globe uses NASA Earth Observatory's Blue Marble Next Generation topography/bathymetry texture at 5400 × 2700, with a local relief map. Credit: NASA Earth Observatory.
-
-## Data ingestion
-
-`npm run catalog` produces `public/data/catalog.json` from the supplied CSV. It keeps report metadata, source links, period, local PDF matching, property types, and geographic anchors. It does not duplicate PDF contents into the browser bundle.
-
-For structured market observations, install the Python dependencies once:
+Open the local Vite URL shown in the terminal. To make a production build:
 
 ```powershell
-python -m pip install pypdf google-genai
+npm run build
 ```
 
-The existing `.env` is read locally and is never served to the browser. Start with a single, diagram-aware report:
+## Public app data
 
-```powershell
-npm run extract -- --limit 1 --visual
-```
+The deployed frontend reads these versioned static files:
 
-Then process the complete archive resumably:
+| File | Purpose |
+| --- | --- |
+| `public/data/catalog.json` | Report metadata, filters, dates, and market coordinates. |
+| `public/data/observations.json` | Extracted, source-cited market observations used in report previews. |
 
-```powershell
-npm run extract -- --visual
-npm run observations
-```
+The app uses Vite's `BASE_URL`, so it works both locally and from the GitHub Pages project path.
 
-Each completed report is written under `data/extractions/` with its original filename, source hash, model, extraction time, page number, source label, unit/currency, and confidence. `npm run observations` publishes those completed observations into the Atlas detail panel. Re-running skips completed files; add `--force` only to reprocess them.
+## Refreshing the data locally
 
-## Production integration next
+The raw PDF collection, local working data, logs, and API credentials are intentionally excluded from Git.
 
-Load `data/extractions/*.json` into Postgres/PostGIS as `observations` linked to `reports`. The UI should query that API for metric values and historical series; it already exposes the catalog, filters, timeline, source-report handoff, and geography. Keep both original and normalized metric names so any cross-market comparison remains auditable.
+1. Place the local report index and PDF archive in the expected workspace locations.
+2. Rebuild the public catalog:
 
-## Important safeguards
+   ```powershell
+   npm run catalog
+   ```
 
-- The visual mode transmits each original PDF to Gemini so it can interpret charts and diagrams. Confirm CBRE’s authorization and expected API spend before launching the full 2,155-file run.
-- Treat values under low confidence or with conflicting source-page evidence as a review queue, not published facts.
-- `source_page` and the CBRE report URL are required for every displayed numeric observation.
+3. To extract figures, install the Python dependencies and set `GEMINI_API_KEY` in a local `.env` file:
+
+   ```powershell
+   python -m pip install pypdf google-genai
+   npm run extract -- --visual
+   npm run observations
+   ```
+
+The extraction process is resumable. It writes local artifacts under `data/extractions/`; `npm run observations` converts completed extracts into the public observation payload.
+
+## Privacy and data handling
+
+- `.env` and every `.env.*` variant are ignored; API keys are never sent to the browser.
+- The 2,155 original CBRE PDFs, local extraction cache, and logs are not committed or published.
+- Every displayed direct figure retains its source page. Reports without a completed extraction show an explicit pending state rather than fabricated metrics.
+- Confirm your organization has authorization before sending a report to an external extraction model.
+
+## Deployment
+
+Pushing to `main` runs [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml). The workflow builds the static Vite app with the correct repository base path and deploys the `dist/` artifact to GitHub Pages.
