@@ -111,7 +111,7 @@ export default function MarketGlobe({ points, selectedReportId, extractedReportI
         }
       }}
     >
-      <svg viewBox="0 0 950 540" role="img" aria-label="Interactive global market map">
+      <svg viewBox="0 0 950 540" preserveAspectRatio="none" role="img" aria-label="Interactive global market map">
         <defs>
           <radialGradient id="mapGlow" cx="50%" cy="48%" r="68%">
             <stop offset="0%" stopColor="#0d1d29" stopOpacity="0.9" />
