@@ -98,6 +98,7 @@ header {
   letter-spacing: 0.13em;
 }
 .header-meta {
+  margin-left: 24px;
   font: 10px "DM Mono";
   letter-spacing: 0.13em;
   color: #a2b2bd;
