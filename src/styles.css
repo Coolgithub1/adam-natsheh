@@ -1273,6 +1273,22 @@ footer {
 .methodology-detail span, .methodology-detail b { display: block; }
 .methodology-detail span { color: #8ee7b5; font: 9px "DM Mono"; letter-spacing: 0.07em; }
 .methodology-detail b { margin-top: 7px; color: #e1f1e7; font-size: 13px; line-height: 1.35; }
+.methodology-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 28px 0;
+  background: rgba(142, 231, 181, 0.25);
+}
+.methodology-flow div { position: relative; min-height: 156px; padding: 18px; background: #073326; }
+.methodology-flow b { display: grid; width: 28px; height: 28px; place-items: center; margin-bottom: 21px; border: 1px solid #8ee7b5; border-radius: 50%; color: #8ee7b5; font: 700 12px "DM Mono"; }
+.methodology-flow span, .methodology-flow small { display: block; }
+.methodology-flow span { color: #eafff1; font-size: 15px; font-weight: 700; }
+.methodology-flow small { margin-top: 8px; color: #a7c2b4; font-size: 12px; line-height: 1.45; }
+.methodology-principles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 27px 0 8px; }
+.methodology-principles section { padding: 0 0 0 15px; border-left: 2px solid #8ee7b5; }
+.methodology-principles h3 { margin: 0 0 7px; }
+.methodology-principles p { margin: 0; font-size: 14px; line-height: 1.5; }
 .method-grid section { padding: 24px; background: #073326; }
 .method-grid p { margin: 10px 0; font-size: 14px; line-height: 1.55; }
 .article-source { margin-top: 42px; padding-top: 18px; border-top: 1px solid rgba(142, 231, 181, 0.25); color: #8ca99c !important; font-size: 12px !important; }
@@ -1394,6 +1410,9 @@ footer {
   .explorer-heading > p { margin-top: 12px; }
   .timing-scale { font-size: 8px; }
   .methodology-detail { grid-template-columns: 1fr; }
+  .methodology-flow { grid-template-columns: 1fr 1fr; }
+  .methodology-flow div { min-height: 130px; }
+  .methodology-principles { grid-template-columns: 1fr; gap: 20px; }
   .about-hero { grid-template-columns: 1fr; gap: 24px; }
   .profile-photo { max-width: 320px; }
   .about-details { grid-template-columns: 1fr; }

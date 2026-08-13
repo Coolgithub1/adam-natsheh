@@ -76,7 +76,7 @@ type DirectFigure = {
   reportTitle: string;
   period: string;
 };
-type SitePage = "about" | "atlas" | "blog";
+type SitePage = "about" | "atlas" | "blog" | "methodology";
 const METHODOLOGY_COMPARE = [
   { name: "CBRE", threshold: "10,000+ sf", timing: "Signed lease", signal: "Committed demand", vacancy: "Vacant within 30 days", revision: "Historical series may be revised", position: 24 },
   { name: "Colliers", threshold: "20,000+ sf", timing: "Not disclosed", signal: "Not disclosed", vacancy: "Not disclosed", revision: "Inventory/classification adjusted", position: 50 },
@@ -87,7 +87,7 @@ const currentSitePage = (): SitePage => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
     .replace(/^\/+|\/+$/g, "");
-  if (path === "atlas" || path === "blog") return path;
+  if (path === "atlas" || path === "blog" || path === "methodology") return path;
   return "about";
 };
 const toQuarter = (month: string) => {
@@ -517,6 +517,9 @@ export default function App() {
           <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" ? "active" : ""} aria-current={sitePanel === "blog" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
             <BookOpen size={14} /> Blog
           </a>
+          <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>
+            Methodology
+          </a>
         </nav>
         <button
           className="icon-button"
@@ -852,11 +855,12 @@ export default function App() {
       {sitePanel !== "atlas" && (
         <section className="site-panel" aria-labelledby={`${sitePanel}-title`}>
           <div className="site-panel-bar">
-            <span>{sitePanel === "blog" ? "MARKET ATLAS / FIELD NOTES" : "MARKET ATLAS / ABOUT"}</span>
+            <span>{sitePanel === "blog" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
             <nav className="site-nav site-panel-nav" aria-label="Site navigation">
               <a href={`${import.meta.env.BASE_URL}`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}><UserRound size={14} /> About me</a>
               <a href={`${import.meta.env.BASE_URL}atlas`} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>Market Atlas</a>
               <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" ? "active" : ""} aria-current={sitePanel === "blog" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
+              <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>Methodology</a>
             </nav>
           </div>
           {sitePanel === "about" ? (
@@ -884,7 +888,7 @@ export default function App() {
               <p>Outside of research, I enjoy photography, travelling, and learning new languages. Each one sharpens the same habit that drives my professional work: paying attention to context, asking better questions, and finding a clearer way to share what matters.</p>
               <button className="article-back" onClick={() => navigateSitePage("atlas")}>Explore the atlas</button>
             </article>
-          ) : (
+          ) : sitePanel === "blog" ? (
             <article className="article">
               <p className="article-eyebrow">RESEARCH METHODS / CHARLESTON INDUSTRIAL / Q2 2026</p>
               <h1 id="blog-title">Four research firms, four ways of measuring one industrial market</h1>
@@ -920,6 +924,34 @@ export default function App() {
               <h2>The takeaway</h2>
               <p>The best practice is to compare each firm's trend with its own historical series, then reconcile definitions before comparing firms. A strong conclusion needs a like-for-like inventory universe, matching timing conventions, and clarity on whether the metric represents a signed commitment, available space, or occupied space.</p>
               <p className="article-source">Methodology notes are drawn from the firms' supplied Q2 2026 Charleston industrial reports. This article is an independent comparison, not a reproduction of their research.</p>
+            </article>
+          ) : (
+            <article className="article methodology-page">
+              <p className="article-eyebrow">TECHNICAL NOTE / MARKET ATLAS</p>
+              <h1 id="methodology-title">How Market Atlas turns a catalog of reports into a research interface.</h1>
+              <p className="article-lede">Market Atlas is designed to help people find, inspect, and compare commercial real estate research without implying that every report or metric is automatically comparable.</p>
+              <h2>Design premise</h2>
+              <p>Real estate research is often distributed across PDFs, markets, property types, and reporting periods. The core problem is not simply access. It is orientation: users need to see where coverage exists, narrow the universe quickly, and understand the source quality behind a figure before they use it.</p>
+              <div className="methodology-flow" aria-label="Market Atlas research flow">
+                <div><b>1</b><span>Catalog reports</span><small>Title, market, period, property type, geography</small></div>
+                <div><b>2</b><span>Map coverage</span><small>One navigable view of the available research universe</small></div>
+                <div><b>3</b><span>Inspect sources</span><small>Open the report and retain page-level figure provenance</small></div>
+                <div><b>4</b><span>Compare carefully</span><small>Show only compatible figures as direct comparisons</small></div>
+              </div>
+              <h2>Data and research logic</h2>
+              <p>The Atlas uses a versioned catalog to store report metadata such as title, date, period, market, country, coordinates, property type, and source link. This supports filtering and mapping without presenting derived market conclusions as if they were source data.</p>
+              <p>When figures are extracted, the interface preserves the source file and page number. Reports without completed figure extraction display a clear pending state rather than filling the space with estimates. Like-for-like comparisons appear only where reports share the same metric family, unit, and currency.</p>
+              <div className="methodology-principles">
+                <section><h3>Traceability</h3><p>Every direct figure should lead back to its original report and source page.</p></section>
+                <section><h3>Comparability</h3><p>Shared labels are not enough. Unit, currency, timing, and scope must also align.</p></section>
+                <section><h3>Honest uncertainty</h3><p>Missing extraction or unclear methodology is surfaced as a limitation, not hidden.</p></section>
+              </div>
+              <h2>Why the interface looks this way</h2>
+              <p>The globe is an orientation device, not a choropleth of market performance. It makes research coverage spatial: clusters show where reports exist, while filters reduce the cognitive load of a large catalog. The timeline provides a second organizing dimension—reporting period—so users can move through coverage without losing geographic context.</p>
+              <p>The report dock intentionally keeps the original report link, source-linked figures, and context together. This follows a progressive-disclosure approach: the broad view supports discovery; the detail view supports verification; comparison is optional and constrained by data compatibility.</p>
+              <h2>Limits and intended use</h2>
+              <p>Market Atlas is a research-navigation and source-comparison tool. It does not replace independent due diligence, standardize inconsistent third-party methodologies, or make investment recommendations. The most reliable use is to locate the underlying evidence, check definitions, and compare trends within a consistent survey series.</p>
+              <button className="article-back" onClick={() => navigateSitePage("atlas")}>Open Market Atlas</button>
             </article>
           )}
         </section>
