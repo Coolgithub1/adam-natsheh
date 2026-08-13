@@ -4,10 +4,12 @@ import {
   ChevronDown,
   FileText,
   Filter,
+  Linkedin,
   MapPin,
   Pause,
   Play,
   Search,
+  Twitter,
   UserRound,
   BookOpen,
   X,
@@ -837,6 +839,10 @@ export default function App() {
         </div>
         <div className="period-readout">{period}</div>
       </footer>
+      <aside className="social-links" aria-label="Social profiles">
+        <a href="https://www.linkedin.com/in/zompdesigns/" target="_blank" rel="noreferrer" aria-label="LinkedIn profile"><Linkedin size={17} /><span>LinkedIn</span></a>
+        <a href="https://x.com/zompdesigns" target="_blank" rel="noreferrer" aria-label="X profile"><Twitter size={17} /><span>X</span></a>
+      </aside>
       {sitePanel !== "atlas" && (
         <section className="site-panel" aria-labelledby={`${sitePanel}-title`}>
           <div className="site-panel-bar">
