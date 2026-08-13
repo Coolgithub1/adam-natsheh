@@ -8,6 +8,8 @@ import {
   Pause,
   Play,
   Search,
+  UserRound,
+  BookOpen,
   X,
 } from "lucide-react";
 
@@ -129,7 +131,8 @@ export default function App() {
     [compareMarket, setCompareMarket] = useState(""),
     [compareOpen, setCompareOpen] = useState(false),
     [savedViews, setSavedViews] = useState<SavedView[]>([]),
-    [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
+    [savedViewsLoaded, setSavedViewsLoaded] = useState(false),
+    [sitePanel, setSitePanel] = useState<"about" | "blog" | null>(null);
   const selected = selection?.reports[selection.index] ?? null;
   useEffect(() => {
     fetch(`${import.meta.env.BASE_URL}data/catalog.json`)
@@ -473,6 +476,14 @@ export default function App() {
           GLOBAL REAL ESTATE INTELLIGENCE <span>•</span>{" "}
           {catalog.meta.reportCount.toLocaleString()} REPORTS
         </div>
+        <nav className="site-nav" aria-label="Site navigation">
+          <button className={sitePanel === "about" ? "active" : ""} onClick={() => setSitePanel("about")}>
+            <UserRound size={14} /> About me
+          </button>
+          <button className={sitePanel === "blog" ? "active" : ""} onClick={() => setSitePanel("blog")}>
+            <BookOpen size={14} /> Blog
+          </button>
+        </nav>
         <button
           className="icon-button"
           onClick={() => setPanel(!panel)}
@@ -800,6 +811,47 @@ export default function App() {
         </div>
         <div className="period-readout">{period}</div>
       </footer>
+      {sitePanel && (
+        <section className="site-panel" role="dialog" aria-modal="true" aria-labelledby={`${sitePanel}-title`}>
+          <div className="site-panel-bar">
+            <span>{sitePanel === "blog" ? "MARKET ATLAS / FIELD NOTES" : "MARKET ATLAS / ABOUT"}</span>
+            <button onClick={() => setSitePanel(null)} aria-label="Close panel"><X size={18} /></button>
+          </div>
+          {sitePanel === "about" ? (
+            <article className="article about-copy">
+              <p className="article-eyebrow">ABOUT ME</p>
+              <h1 id="about-title">Research should make the market easier to read.</h1>
+              <p className="article-lede">I built Market Atlas to make commercial real estate research more discoverable, comparable, and useful for real-world decisions.</p>
+              <p>This site brings market reports into one navigable place. It is designed for people who want to move from scattered PDFs to clearer questions: What is changing? Which data is comparable? What does the evidence actually support?</p>
+              <p>My work focuses on disciplined market research, transparent source use, and the practical details that can change an investment or leasing conclusion.</p>
+              <button className="article-back" onClick={() => setSitePanel(null)}>Return to the atlas</button>
+            </article>
+          ) : (
+            <article className="article">
+              <p className="article-eyebrow">RESEARCH METHODS / CHARLESTON INDUSTRIAL / Q2 2026</p>
+              <h1 id="blog-title">Four research firms, four ways of measuring one industrial market</h1>
+              <p className="article-lede">CBRE, Colliers, Cushman &amp; Wakefield, and JLL all describe Charleston industrial. Their headline numbers differ because their methodologies do too.</p>
+              <h2>The first lesson: the reports are not interchangeable</h2>
+              <p>A vacancy rate is only as comparable as the buildings and timing rules behind it. In the Q2 2026 reports, the firms do not use the same inventory universe, definition of absorption, or disclosure level. The result is a range of vacancy rates that should not be treated as a precise market ranking.</p>
+              <div className="method-grid" aria-label="Research methodology comparison">
+                <section><h3>CBRE</h3><p><b>Coverage:</b> industrial properties over 10,000 square feet in seven named local submarkets.</p><p><b>Timing:</b> absorption is recorded when a lease is signed; a prelease is recorded at delivery.</p><p><b>Vacancy:</b> space occupiable within 30 days. Availability can include occupied or vacant space ready within six months.</p></section>
+                <section><h3>Colliers</h3><p><b>Coverage:</b> industrial buildings of 20,000 square feet or more that can adapt to industrial use.</p><p><b>Classification:</b> warehouse/distribution, manufacturing, and flex/R&amp;D; flex requires at least 30% office area.</p><p><b>Continuity:</b> inventory and classifications are adjusted on an ongoing basis.</p></section>
+                <section><h3>Cushman &amp; Wakefield</h3><p><b>Timing:</b> absorption follows physical move-ins and move-outs, not new leasing.</p><p><b>Vacancy:</b> its available measure excludes space that is leased but not yet occupied.</p><p><b>Usefulness:</b> the report separates realized occupancy change from YTD leasing activity.</p></section>
+                <section><h3>JLL</h3><p><b>Disclosure:</b> the report provides headline vacancy, availability, absorption, and supply figures but does not state its size cutoff or formal calculation rules.</p><p><b>Read-through:</b> it is a helpful directional market summary, but it cannot be fully reconciled with the others from this report alone.</p></section>
+              </div>
+              <h2>Signed demand and occupied demand are different signals</h2>
+              <p>The most consequential methodological split is CBRE versus Cushman &amp; Wakefield. CBRE records a signed lease before the tenant necessarily occupies the building. Cushman &amp; Wakefield records the event at physical occupancy. In a market with large preleases or long build-outs, CBRE can show demand improving earlier; C&amp;W shows when that demand has become occupied space. Neither is wrong. They answer different questions.</p>
+              <h2>Why the vacancy figures spread</h2>
+              <p>CBRE's 10,000-square-foot threshold captures a different universe from Colliers' 20,000-square-foot minimum. C&amp;W reports a larger inventory base, while JLL does not disclose its survey boundary in this edition. CBRE also distinguishes 30-day vacant space from six-month availability, and C&amp;W excludes leased-but-unoccupied space from its available measure. Those choices alone can move the reported rate materially.</p>
+              <h2>What to use each report for</h2>
+              <ul><li><b>CBRE:</b> an early read on signed demand and a clearly stated local survey framework.</li><li><b>Colliers:</b> product-type context, particularly warehouse, manufacturing, and flex segmentation.</li><li><b>Cushman &amp; Wakefield:</b> realized occupancy change and a useful separation of leasing from absorption.</li><li><b>JLL:</b> concise market narrative and directional outlook; use headline metrics with care until definitions are confirmed.</li></ul>
+              <h2>The takeaway</h2>
+              <p>The best practice is to compare each firm's trend with its own historical series, then reconcile definitions before comparing firms. A strong conclusion needs a like-for-like inventory universe, matching timing conventions, and clarity on whether the metric represents a signed commitment, available space, or occupied space.</p>
+              <p className="article-source">Methodology notes are drawn from the firms' supplied Q2 2026 Charleston industrial reports. This article is an independent comparison, not a reproduction of their research.</p>
+            </article>
+          )}
+        </section>
+      )}
     </main>
   );
 }
