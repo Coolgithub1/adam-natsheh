@@ -76,7 +76,7 @@ type DirectFigure = {
   reportTitle: string;
   period: string;
 };
-type SitePage = "about" | "atlas" | "blog" | "methodology";
+type SitePage = "about" | "atlas" | "blog" | "blog-charleston" | "methodology";
 const METHODOLOGY_COMPARE = [
   { name: "CBRE", threshold: "10,000+ sf", timing: "Signed lease", signal: "Committed demand", vacancy: "Vacant within 30 days", revision: "Historical series may be revised", position: 24 },
   { name: "Colliers", threshold: "20,000+ sf", timing: "Not disclosed", signal: "Not disclosed", vacancy: "Not disclosed", revision: "Inventory/classification adjusted", position: 50 },
@@ -87,7 +87,9 @@ const currentSitePage = (): SitePage => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
     .replace(/^\/+|\/+$/g, "");
-  if (path === "atlas" || path === "blog" || path === "methodology") return path;
+  if (path === "atlas" || path === "blog" || path === "blog/charleston-q2-2026-methodology" || path === "methodology") {
+    return path === "blog/charleston-q2-2026-methodology" ? "blog-charleston" : path;
+  }
   return "about";
 };
 const toQuarter = (month: string) => {
@@ -490,7 +492,8 @@ export default function App() {
     setSavedViews((current) => [...current, { name: name.trim(), region, sector, month, query, period }]);
   };
   const navigateSitePage = (page: SitePage) => {
-    const destination = `${import.meta.env.BASE_URL}${page === "about" ? "" : page}`;
+    const route = page === "blog-charleston" ? "blog/charleston-q2-2026-methodology" : page;
+    const destination = `${import.meta.env.BASE_URL}${route === "about" ? "" : route}`;
     window.history.pushState({}, "", destination);
     setSitePanel(page);
     window.scrollTo({ top: 0 });
@@ -514,7 +517,7 @@ export default function App() {
           <a href={`${import.meta.env.BASE_URL}atlas`} className={sitePanel === "atlas" ? "active" : ""} aria-current={sitePanel === "atlas" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>
             Market Atlas
           </a>
-          <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" ? "active" : ""} aria-current={sitePanel === "blog" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
+          <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
             <BookOpen size={14} /> Blog
           </a>
           <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>
@@ -855,11 +858,11 @@ export default function App() {
       {sitePanel !== "atlas" && (
         <section className="site-panel" aria-labelledby={`${sitePanel}-title`}>
           <div className="site-panel-bar">
-            <span>{sitePanel === "blog" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
+            <span>{sitePanel === "blog" || sitePanel === "blog-charleston" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
             <nav className="site-nav site-panel-nav" aria-label="Site navigation">
               <a href={`${import.meta.env.BASE_URL}`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}><UserRound size={14} /> About me</a>
               <a href={`${import.meta.env.BASE_URL}atlas`} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>Market Atlas</a>
-              <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" ? "active" : ""} aria-current={sitePanel === "blog" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
+              <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
               <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>Methodology</a>
             </nav>
           </div>
@@ -889,7 +892,20 @@ export default function App() {
               <button className="article-back" onClick={() => navigateSitePage("atlas")}>Explore the atlas</button>
             </article>
           ) : sitePanel === "blog" ? (
+            <article className="article blog-index">
+              <p className="article-eyebrow">FIELD NOTES</p>
+              <h1 id="blog-title">Research notes for reading commercial real estate data with more context.</h1>
+              <p className="article-lede">A collection of report comparisons, methodology notes, and market-research observations from Market Atlas.</p>
+              <section className="blog-list" aria-label="Blog posts">
+                <a className="blog-card" href={`${import.meta.env.BASE_URL}blog/charleston-q2-2026-methodology`} onClick={(event) => { event.preventDefault(); navigateSitePage("blog-charleston"); }}>
+                  <div><p className="article-eyebrow">Q2 2026 · CHARLESTON INDUSTRIAL · METHODOLOGY</p><h2>Four research firms, four ways of measuring one industrial market</h2><p>CBRE, Colliers, Cushman &amp; Wakefield, and JLL may describe the same market, but their survey universes and timing conventions create different headline outcomes.</p></div>
+                  <span>Read report →</span>
+                </a>
+              </section>
+            </article>
+          ) : sitePanel === "blog-charleston" ? (
             <article className="article">
+              <button className="article-crumb" onClick={() => navigateSitePage("blog")}>← All field notes</button>
               <p className="article-eyebrow">RESEARCH METHODS / CHARLESTON INDUSTRIAL / Q2 2026</p>
               <h1 id="blog-title">Four research firms, four ways of measuring one industrial market</h1>
               <p className="article-lede">CBRE, Colliers, Cushman &amp; Wakefield, and JLL all describe Charleston industrial. Their headline numbers differ because their methodologies do too.</p>
