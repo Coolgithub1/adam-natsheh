@@ -76,6 +76,14 @@ type DirectFigure = {
   reportTitle: string;
   period: string;
 };
+type SitePage = "about" | "blog" | null;
+const currentSitePage = (): SitePage => {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
+    .replace(/^\/+|\/+$/g, "");
+  if (path === "about" || path === "blog") return path;
+  return null;
+};
 const toQuarter = (month: string) => {
   const quarterMatch = month.match(/^(\d{4})-Q([1-4])$/);
   if (quarterMatch) return `${quarterMatch[1]} Q${quarterMatch[2]}`;
@@ -132,7 +140,7 @@ export default function App() {
     [compareOpen, setCompareOpen] = useState(false),
     [savedViews, setSavedViews] = useState<SavedView[]>([]),
     [savedViewsLoaded, setSavedViewsLoaded] = useState(false),
-    [sitePanel, setSitePanel] = useState<"about" | "blog" | null>(null);
+    [sitePanel, setSitePanel] = useState<SitePage>(currentSitePage);
   const selected = selection?.reports[selection.index] ?? null;
   useEffect(() => {
     fetch(`${import.meta.env.BASE_URL}data/catalog.json`)
@@ -432,6 +440,15 @@ export default function App() {
     );
     return () => clearInterval(timer);
   }, [playing, catalog, quarters]);
+  useEffect(() => {
+    const syncPage = () => setSitePanel(currentSitePage());
+    window.addEventListener("popstate", syncPage);
+    const page = currentSitePage();
+    if (page && new URLSearchParams(window.location.search).has("route")) {
+      window.history.replaceState({}, "", `${import.meta.env.BASE_URL}${page}`);
+    }
+    return () => window.removeEventListener("popstate", syncPage);
+  }, []);
   if (!catalog)
     return (
       <main className="loading">
@@ -464,6 +481,12 @@ export default function App() {
     if (!name?.trim()) return;
     setSavedViews((current) => [...current, { name: name.trim(), region, sector, month, query, period }]);
   };
+  const navigateSitePage = (page: SitePage) => {
+    const destination = `${import.meta.env.BASE_URL}${page ?? ""}`;
+    window.history.pushState({}, "", destination);
+    setSitePanel(page);
+    window.scrollTo({ top: 0 });
+  };
   return (
     <main className={`atlas ${panel ? "filters-open" : ""}`}>
       <header>
@@ -477,12 +500,12 @@ export default function App() {
           {catalog.meta.reportCount.toLocaleString()} REPORTS
         </div>
         <nav className="site-nav" aria-label="Site navigation">
-          <button className={sitePanel === "about" ? "active" : ""} onClick={() => setSitePanel("about")}>
+          <a href={`${import.meta.env.BASE_URL}about`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}>
             <UserRound size={14} /> About me
-          </button>
-          <button className={sitePanel === "blog" ? "active" : ""} onClick={() => setSitePanel("blog")}>
+          </a>
+          <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" ? "active" : ""} aria-current={sitePanel === "blog" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
             <BookOpen size={14} /> Blog
-          </button>
+          </a>
         </nav>
         <button
           className="icon-button"
@@ -812,10 +835,10 @@ export default function App() {
         <div className="period-readout">{period}</div>
       </footer>
       {sitePanel && (
-        <section className="site-panel" role="dialog" aria-modal="true" aria-labelledby={`${sitePanel}-title`}>
+        <section className="site-panel" aria-labelledby={`${sitePanel}-title`}>
           <div className="site-panel-bar">
             <span>{sitePanel === "blog" ? "MARKET ATLAS / FIELD NOTES" : "MARKET ATLAS / ABOUT"}</span>
-            <button onClick={() => setSitePanel(null)} aria-label="Close panel"><X size={18} /></button>
+            <button onClick={() => navigateSitePage(null)} aria-label="Return to atlas"><X size={18} /></button>
           </div>
           {sitePanel === "about" ? (
             <article className="article about-copy">
@@ -824,7 +847,7 @@ export default function App() {
               <p className="article-lede">I built Market Atlas to make commercial real estate research more discoverable, comparable, and useful for real-world decisions.</p>
               <p>This site brings market reports into one navigable place. It is designed for people who want to move from scattered PDFs to clearer questions: What is changing? Which data is comparable? What does the evidence actually support?</p>
               <p>My work focuses on disciplined market research, transparent source use, and the practical details that can change an investment or leasing conclusion.</p>
-              <button className="article-back" onClick={() => setSitePanel(null)}>Return to the atlas</button>
+              <button className="article-back" onClick={() => navigateSitePage(null)}>Return to the atlas</button>
             </article>
           ) : (
             <article className="article">
