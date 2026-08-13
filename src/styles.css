@@ -118,16 +118,20 @@ header {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 9px;
-  color: #b8d2c7;
-  font: 9px "DM Mono";
-  letter-spacing: 0.08em;
+  padding: 8px 11px;
+  border: 1px solid rgba(142, 231, 181, 0.42);
+  color: #e5f6eb;
+  font: 700 10px "DM Mono";
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-decoration: none;
 }
 .site-nav a:hover,
 .site-nav a.active {
-  color: #8ee7b5;
-  background: rgba(0, 166, 90, 0.12);
+  border-color: #8ee7b5;
+  color: #f2fff7;
+  background: #087a47;
+  box-shadow: 0 0 14px rgba(0, 166, 90, 0.3);
 }
 .icon-button,
 button {
@@ -1093,7 +1097,7 @@ footer {
   z-index: 20;
   inset: 0;
   overflow-y: auto;
-  background: rgba(1, 30, 22, 0.98);
+  background: #011e16;
   color: #dce9e2;
 }
 .site-panel-bar {
@@ -1182,7 +1186,7 @@ footer {
     display: none;
   }
   .site-nav { margin-left: auto; margin-right: 4px; }
-  .site-nav a { padding: 6px; font-size: 0; }
+  .site-nav a { padding: 7px; font-size: 0; }
   .site-nav a svg { width: 16px; height: 16px; }
   .icon-button {
     display: block;
