@@ -76,13 +76,13 @@ type DirectFigure = {
   reportTitle: string;
   period: string;
 };
-type SitePage = "about" | "blog" | null;
+type SitePage = "about" | "atlas" | "blog";
 const currentSitePage = (): SitePage => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
     .replace(/^\/+|\/+$/g, "");
-  if (path === "about" || path === "blog") return path;
-  return null;
+  if (path === "atlas" || path === "blog") return path;
+  return "about";
 };
 const toQuarter = (month: string) => {
   const quarterMatch = month.match(/^(\d{4})-Q([1-4])$/);
@@ -482,7 +482,7 @@ export default function App() {
     setSavedViews((current) => [...current, { name: name.trim(), region, sector, month, query, period }]);
   };
   const navigateSitePage = (page: SitePage) => {
-    const destination = `${import.meta.env.BASE_URL}${page ?? ""}`;
+    const destination = `${import.meta.env.BASE_URL}${page === "about" ? "" : page}`;
     window.history.pushState({}, "", destination);
     setSitePanel(page);
     window.scrollTo({ top: 0 });
@@ -502,6 +502,9 @@ export default function App() {
         <nav className="site-nav" aria-label="Site navigation">
           <a href={`${import.meta.env.BASE_URL}about`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}>
             <UserRound size={14} /> About me
+          </a>
+          <a href={`${import.meta.env.BASE_URL}atlas`} className={sitePanel === "atlas" ? "active" : ""} aria-current={sitePanel === "atlas" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>
+            Market Atlas
           </a>
           <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" ? "active" : ""} aria-current={sitePanel === "blog" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
             <BookOpen size={14} /> Blog
@@ -834,11 +837,15 @@ export default function App() {
         </div>
         <div className="period-readout">{period}</div>
       </footer>
-      {sitePanel && (
+      {sitePanel !== "atlas" && (
         <section className="site-panel" aria-labelledby={`${sitePanel}-title`}>
           <div className="site-panel-bar">
             <span>{sitePanel === "blog" ? "MARKET ATLAS / FIELD NOTES" : "MARKET ATLAS / ABOUT"}</span>
-            <button onClick={() => navigateSitePage(null)} aria-label="Return to atlas"><X size={18} /></button>
+            <nav className="site-nav site-panel-nav" aria-label="Site navigation">
+              <a href={`${import.meta.env.BASE_URL}`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}><UserRound size={14} /> About me</a>
+              <a href={`${import.meta.env.BASE_URL}atlas`} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>Market Atlas</a>
+              <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" ? "active" : ""} aria-current={sitePanel === "blog" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
+            </nav>
           </div>
           {sitePanel === "about" ? (
             <article className="article about-copy">
@@ -847,7 +854,7 @@ export default function App() {
               <p className="article-lede">I built Market Atlas to make commercial real estate research more discoverable, comparable, and useful for real-world decisions.</p>
               <p>This site brings market reports into one navigable place. It is designed for people who want to move from scattered PDFs to clearer questions: What is changing? Which data is comparable? What does the evidence actually support?</p>
               <p>My work focuses on disciplined market research, transparent source use, and the practical details that can change an investment or leasing conclusion.</p>
-              <button className="article-back" onClick={() => navigateSitePage(null)}>Return to the atlas</button>
+              <button className="article-back" onClick={() => navigateSitePage("atlas")}>Explore the atlas</button>
             </article>
           ) : (
             <article className="article">

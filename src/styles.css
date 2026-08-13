@@ -1116,6 +1116,9 @@ footer {
   letter-spacing: 0.14em;
 }
 .site-panel-bar button { color: #d9f4e4; }
+.site-panel-nav {
+  margin: 0;
+}
 .article {
   width: min(840px, calc(100% - 48px));
   margin: 0 auto;
@@ -1188,6 +1191,13 @@ footer {
   .site-nav { margin-left: auto; margin-right: 4px; }
   .site-nav a { padding: 7px; font-size: 0; }
   .site-nav a svg { width: 16px; height: 16px; }
+  .site-panel-nav { gap: 3px; }
+  .site-panel-nav a {
+    padding: 6px 7px;
+    font-size: 8px;
+    letter-spacing: 0.04em;
+  }
+  .site-panel-nav a svg { width: 13px; height: 13px; }
   .icon-button {
     display: block;
   }
