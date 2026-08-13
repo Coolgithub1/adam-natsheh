@@ -77,6 +77,12 @@ type DirectFigure = {
   period: string;
 };
 type SitePage = "about" | "atlas" | "blog";
+const METHODOLOGY_COMPARE = [
+  { name: "CBRE", threshold: "10,000+ sf", timing: "Signed lease", signal: "Committed demand", vacancy: "Vacant within 30 days", revision: "Historical series may be revised", position: 24 },
+  { name: "Colliers", threshold: "20,000+ sf", timing: "Not disclosed", signal: "Not disclosed", vacancy: "Not disclosed", revision: "Inventory/classification adjusted", position: 50 },
+  { name: "Cushman & Wakefield", threshold: "Not disclosed", timing: "Physical move-in/out", signal: "Realized occupancy", vacancy: "Leased, unoccupied space excluded", revision: "Not disclosed", position: 76 },
+  { name: "JLL", threshold: "Not disclosed", timing: "Not disclosed", signal: "Occupancy discussed", vacancy: "Reports vacancy and availability", revision: "Not disclosed", position: 50 },
+];
 const currentSitePage = (): SitePage => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
@@ -140,8 +146,10 @@ export default function App() {
     [compareOpen, setCompareOpen] = useState(false),
     [savedViews, setSavedViews] = useState<SavedView[]>([]),
     [savedViewsLoaded, setSavedViewsLoaded] = useState(false),
+    [methodologyFirm, setMethodologyFirm] = useState("CBRE"),
     [sitePanel, setSitePanel] = useState<SitePage>(currentSitePage);
   const selected = selection?.reports[selection.index] ?? null;
+  const activeMethodology = METHODOLOGY_COMPARE.find((firm) => firm.name === methodologyFirm) ?? METHODOLOGY_COMPARE[0];
   useEffect(() => {
     fetch(`${import.meta.env.BASE_URL}data/catalog.json`)
       .then((r) => r.json())
@@ -883,6 +891,20 @@ export default function App() {
               <p className="article-lede">CBRE, Colliers, Cushman &amp; Wakefield, and JLL all describe Charleston industrial. Their headline numbers differ because their methodologies do too.</p>
               <h2>The first lesson: the reports are not interchangeable</h2>
               <p>A vacancy rate is only as comparable as the buildings and timing rules behind it. In the Q2 2026 reports, the firms do not use the same inventory universe, definition of absorption, or disclosure level. The result is a range of vacancy rates that should not be treated as a precise market ranking.</p>
+              <section className="methodology-explorer" aria-labelledby="methodology-explorer-title">
+                <div className="explorer-heading"><div><p className="article-eyebrow">INTERACTIVE COMPARISON</p><h3 id="methodology-explorer-title">How each report turns market activity into a headline</h3></div><p>Choose a firm to inspect its published methodology.</p></div>
+                <div className="firm-selector" role="group" aria-label="Select a research firm">
+                  {METHODOLOGY_COMPARE.map((firm) => <button key={firm.name} type="button" aria-pressed={methodologyFirm === firm.name} onClick={() => setMethodologyFirm(firm.name)}>{firm.name}</button>)}
+                </div>
+                <div className="methodology-visual">
+                  <div className="timing-scale" aria-label={`${activeMethodology.name} demand timing comparison`}>
+                    <span>Lease signed</span><span>Build-out / delivery</span><span>Physical move-in</span>
+                    <div className="timing-line" />
+                    <div className="timing-marker" style={{ left: `${activeMethodology.position}%` }}><b>{activeMethodology.name}</b><i>{activeMethodology.timing}</i></div>
+                  </div>
+                  <div className="methodology-detail"><div><span>SURVEY FLOOR</span><b>{activeMethodology.threshold}</b></div><div><span>ABSORPTION SIGNAL</span><b>{activeMethodology.signal}</b></div><div><span>VACANCY TREATMENT</span><b>{activeMethodology.vacancy}</b></div><div><span>SERIES GOVERNANCE</span><b>{activeMethodology.revision}</b></div></div>
+                </div>
+              </section>
               <div className="method-grid" aria-label="Research methodology comparison">
                 <section><h3>CBRE</h3><p><b>Coverage:</b> industrial properties over 10,000 square feet in seven named local submarkets.</p><p><b>Timing:</b> absorption is recorded when a lease is signed; a prelease is recorded at delivery.</p><p><b>Vacancy:</b> space occupiable within 30 days. Availability can include occupied or vacant space ready within six months.</p></section>
                 <section><h3>Colliers</h3><p><b>Coverage:</b> industrial buildings of 20,000 square feet or more that can adapt to industrial use.</p><p><b>Classification:</b> warehouse/distribution, manufacturing, and flex/R&amp;D; flex requires at least 30% office area.</p><p><b>Continuity:</b> inventory and classifications are adjusted on an ongoing basis.</p></section>
