@@ -1141,6 +1141,15 @@ footer {
   text-transform: uppercase;
   box-shadow: 0 5px 16px rgba(0, 0, 0, 0.16);
 }
+.social-links strong {
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 1px solid currentColor;
+  font: 800 11px Arial, sans-serif;
+  letter-spacing: -0.05em;
+}
 .social-links a:hover {
   border-color: #8ee7b5;
   background: #087a47;
