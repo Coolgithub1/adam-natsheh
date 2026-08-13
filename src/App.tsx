@@ -77,7 +77,6 @@ type DirectFigure = {
   period: string;
 };
 type SitePage = "about" | "atlas" | "blog" | "blog-charleston" | "methodology";
-type AtlasProvider = "CBRE" | "Colliers";
 const METHODOLOGY_COMPARE = [
   { name: "CBRE", threshold: "10,000+ sf", timing: "Signed lease", signal: "Committed demand", vacancy: "Vacant within 30 days", revision: "Historical series may be revised", position: 24 },
   { name: "Colliers", threshold: "20,000+ sf", timing: "Not disclosed", signal: "Not disclosed", vacancy: "Not disclosed", revision: "Inventory/classification adjusted", position: 50 },
@@ -88,12 +87,11 @@ const currentSitePage = (): SitePage => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
     .replace(/^\/+|\/+$/g, "");
-  if (path === "atlas" || path === "cbre-atlas" || path === "colliers-atlas" || path === "blog" || path === "blog/charleston-q2-2026-methodology" || path === "methodology") {
-    return path === "blog/charleston-q2-2026-methodology" ? "blog-charleston" : path === "cbre-atlas" || path === "colliers-atlas" ? "atlas" : path;
+  if (path === "atlas" || path === "blog" || path === "blog/charleston-q2-2026-methodology" || path === "methodology") {
+    return path === "blog/charleston-q2-2026-methodology" ? "blog-charleston" : path;
   }
   return "about";
 };
-const currentAtlasProvider = (): AtlasProvider => window.location.pathname.includes("colliers-atlas") ? "Colliers" : "CBRE";
 const toQuarter = (month: string) => {
   const quarterMatch = month.match(/^(\d{4})-Q([1-4])$/);
   if (quarterMatch) return `${quarterMatch[1]} Q${quarterMatch[2]}`;
@@ -108,7 +106,6 @@ const hasLocation = (report: Report) =>
   report.lng !== 0;
 const canonicalRegion = (value: string) => {
   const parts = value.split(";").map((part) => part.trim()).filter(Boolean);
-  if (value === "Global / Multi-region") return value;
   if (parts.length > 1 && !parts.every((part) => part === "Europe" || part === "Nordics")) {
     return "Global / Multi-region";
   }
@@ -152,14 +149,11 @@ export default function App() {
     [savedViews, setSavedViews] = useState<SavedView[]>([]),
     [savedViewsLoaded, setSavedViewsLoaded] = useState(false),
     [methodologyFirm, setMethodologyFirm] = useState("CBRE"),
-    [sitePanel, setSitePanel] = useState<SitePage>(currentSitePage),
-    [atlasProvider, setAtlasProvider] = useState<AtlasProvider>(currentAtlasProvider);
+    [sitePanel, setSitePanel] = useState<SitePage>(currentSitePage);
   const selected = selection?.reports[selection.index] ?? null;
   const activeMethodology = METHODOLOGY_COMPARE.find((firm) => firm.name === methodologyFirm) ?? METHODOLOGY_COMPARE[0];
   useEffect(() => {
-    setCatalog(null);
-    setSelection(null);
-    fetch(`${import.meta.env.BASE_URL}data/${atlasProvider === "CBRE" ? "catalog" : "colliers-catalog"}.json`)
+    fetch(`${import.meta.env.BASE_URL}data/catalog.json`)
       .then((r) => r.json())
       .then((d: Catalog) => {
         setCatalog(d);
@@ -169,21 +163,19 @@ export default function App() {
         );
         setPeriod(latestSubstantial ?? quarters.at(-1) ?? "");
       });
-  }, [atlasProvider]);
+  }, []);
   useEffect(() => {
-    setSavedViewsLoaded(false);
     try {
-      setSavedViews(JSON.parse(window.localStorage.getItem(`${atlasProvider.toLowerCase()}-atlas-saved-views`) || "[]"));
+      setSavedViews(JSON.parse(window.localStorage.getItem("cbre-atlas-saved-views") || "[]"));
     } catch {
       setSavedViews([]);
     }
     setSavedViewsLoaded(true);
-  }, [atlasProvider]);
+  }, []);
   useEffect(() => {
-    if (savedViewsLoaded) window.localStorage.setItem(`${atlasProvider.toLowerCase()}-atlas-saved-views`, JSON.stringify(savedViews));
-  }, [atlasProvider, savedViews, savedViewsLoaded]);
+    if (savedViewsLoaded) window.localStorage.setItem("cbre-atlas-saved-views", JSON.stringify(savedViews));
+  }, [savedViews, savedViewsLoaded]);
   useEffect(() => {
-    if (atlasProvider !== "CBRE") { setObservations([]); return; }
     fetch(`${import.meta.env.BASE_URL}data/observations.json`)
       .then((r) => (r.ok ? r.json() : []))
       .then(setObservations)
@@ -442,10 +434,10 @@ export default function App() {
         { label: "Indexed report series", value: String(scopeReports.length), detail: `${scopeQuarters.length} quarters covered` },
         { label: "Property coverage", value: String(propertyTypes.size), detail: "property types" },
         { label: "First report indexed", value: earliest ? toQuarter(earliest) : "—", detail: "catalog history" },
-        { label: "Source report", value: selected.period || "—", detail: `selected ${atlasProvider} report` },
+        { label: "Source report", value: selected.period || "—", detail: "selected CBRE report" },
       ],
     };
-  }, [atlasProvider, catalog, observationsBySource, period, selected]);
+  }, [catalog, observationsBySource, period, selected]);
   useEffect(() => {
     if (!playing || !catalog) return;
     const timer = setInterval(
@@ -459,22 +451,18 @@ export default function App() {
     return () => clearInterval(timer);
   }, [playing, catalog, quarters]);
   useEffect(() => {
-    const syncPage = () => {
-      setSitePanel(currentSitePage());
-      setAtlasProvider(currentAtlasProvider());
-    };
+    const syncPage = () => setSitePanel(currentSitePage());
     window.addEventListener("popstate", syncPage);
     const page = currentSitePage();
-    if (page === "atlas" && new URLSearchParams(window.location.search).has("route")) {
-      const route = currentAtlasProvider() === "Colliers" ? "colliers-atlas" : "cbre-atlas";
-      window.history.replaceState({}, "", `${import.meta.env.BASE_URL}${route}`);
+    if (page && new URLSearchParams(window.location.search).has("route")) {
+      window.history.replaceState({}, "", `${import.meta.env.BASE_URL}${page}`);
     }
     return () => window.removeEventListener("popstate", syncPage);
-  }, [atlasProvider]);
+  }, []);
   if (!catalog)
     return (
       <main className="loading">
-        Loading the {atlasProvider} market intelligence atlas…
+        Loading the CBRE market intelligence atlas…
       </main>
     );
   const selectPoint = (p: MarketPoint, reportIndex = 0) =>
@@ -510,18 +498,11 @@ export default function App() {
     setSitePanel(page);
     window.scrollTo({ top: 0 });
   };
-  const navigateAtlas = (provider: AtlasProvider) => {
-    const route = provider === "CBRE" ? "cbre-atlas" : "colliers-atlas";
-    window.history.pushState({}, "", `${import.meta.env.BASE_URL}${route}`);
-    setAtlasProvider(provider);
-    setSitePanel("atlas");
-    window.scrollTo({ top: 0 });
-  };
   return (
     <main className={`atlas ${panel ? "filters-open" : ""}`}>
       <header>
         <div className="brand">
-          <span className={`brand-logo ${atlasProvider === "Colliers" ? "colliers" : ""}`} aria-label={atlasProvider}>{atlasProvider === "CBRE" ? "CBRE" : "COLLIERS"}</span>
+          <span className="brand-logo" aria-label="CBRE">CBRE</span>
           <span className="brand-rule" />
           <i>MARKET ATLAS</i>
         </div>
@@ -533,11 +514,8 @@ export default function App() {
           <a href={`${import.meta.env.BASE_URL}about`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}>
             <UserRound size={14} /> About me
           </a>
-          <a href={`${import.meta.env.BASE_URL}cbre-atlas`} className={`atlas-tab ${sitePanel === "atlas" && atlasProvider === "CBRE" ? "active" : ""}`} aria-current={sitePanel === "atlas" && atlasProvider === "CBRE" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateAtlas("CBRE"); }}>
-            CBRE Atlas
-          </a>
-          <a href={`${import.meta.env.BASE_URL}colliers-atlas`} className={`atlas-tab ${sitePanel === "atlas" && atlasProvider === "Colliers" ? "active" : ""}`} aria-current={sitePanel === "atlas" && atlasProvider === "Colliers" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateAtlas("Colliers"); }}>
-            Colliers Atlas
+          <a href={`${import.meta.env.BASE_URL}atlas`} className={sitePanel === "atlas" ? "active" : ""} aria-current={sitePanel === "atlas" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>
+            Market Atlas
           </a>
           <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
             <BookOpen size={14} /> Blog
@@ -667,7 +645,7 @@ export default function App() {
           )}
           <h2>{selected.title}</h2>
           <p className="detail-summary">
-            {selected.summary || `${atlasProvider} market research and figures.`}
+            {selected.summary || "CBRE market research and figures."}
           </p>
           <section className="signal-summary" aria-label="Market signal summary">
             <div>
@@ -716,7 +694,7 @@ export default function App() {
             target="_blank"
             rel="noreferrer"
           >
-            <FileText size={15} /> View original {atlasProvider} report
+            <FileText size={15} /> View original CBRE report
           </a>
           {selectedPreview && (
             <p className={`preview-label ${selectedPreview.mode}`}>
@@ -743,7 +721,7 @@ export default function App() {
           )}
           {selectedPreview?.mode === "pending" && (
             <p className="benchmark-note">
-              Figure extraction is pending for this PDF. The market benchmark below is derived from related {atlasProvider} report activity and is not a substitute for source figures.
+              Figure extraction is pending for this PDF. The market benchmark below is derived from related CBRE report activity and is not a substitute for source figures.
             </p>
           )}
           <section className="compare-panel">
@@ -827,7 +805,7 @@ export default function App() {
             <p className="eyebrow"><MapPin size={13} /> REPORT PREVIEW</p>
             <h2>Select a market signal</h2>
             <p>
-              Click a beacon to open the {atlasProvider} report, extracted figures, and market-average context here.
+              Click a beacon to open the CBRE report, extracted figures, and market-average context here.
             </p>
             <div className="empty-stat">
               <b>{mappedPeriodReports.length.toLocaleString()}</b>
@@ -883,8 +861,7 @@ export default function App() {
             <span>{sitePanel === "blog" || sitePanel === "blog-charleston" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
             <nav className="site-nav site-panel-nav" aria-label="Site navigation">
               <a href={`${import.meta.env.BASE_URL}`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}><UserRound size={14} /> About me</a>
-              <a className="atlas-tab" href={`${import.meta.env.BASE_URL}cbre-atlas`} onClick={(event) => { event.preventDefault(); navigateAtlas("CBRE"); }}>CBRE Atlas</a>
-              <a className="atlas-tab" href={`${import.meta.env.BASE_URL}colliers-atlas`} onClick={(event) => { event.preventDefault(); navigateAtlas("Colliers"); }}>Colliers Atlas</a>
+              <a href={`${import.meta.env.BASE_URL}atlas`} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>Market Atlas</a>
               <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
               <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>Methodology</a>
             </nav>
@@ -912,7 +889,7 @@ export default function App() {
               </div>
               <h2>Beyond the work</h2>
               <p>Outside of research, I enjoy photography, travelling, and learning new languages. Each one sharpens the same habit that drives my professional work: paying attention to context, asking better questions, and finding a clearer way to share what matters.</p>
-              <button className="article-back" onClick={() => navigateAtlas("CBRE")}>Explore the CBRE atlas</button>
+              <button className="article-back" onClick={() => navigateSitePage("atlas")}>Explore the atlas</button>
             </article>
           ) : sitePanel === "blog" ? (
             <article className="article blog-index">
@@ -1015,7 +992,7 @@ export default function App() {
               <p>The report dock intentionally keeps the original report link, source-linked figures, and context together. This follows a progressive-disclosure approach: the broad view supports discovery; the detail view supports verification; comparison is optional and constrained by data compatibility.</p>
               <h2>Limits and intended use</h2>
               <p>Market Atlas is a research-navigation and source-comparison tool. It does not replace independent due diligence, standardize inconsistent third-party methodologies, or make investment recommendations. The most reliable use is to locate the underlying evidence, check definitions, and compare trends within a consistent survey series.</p>
-              <button className="article-back" onClick={() => navigateAtlas("CBRE")}>Open the CBRE Atlas</button>
+              <button className="article-back" onClick={() => navigateSitePage("atlas")}>Open Market Atlas</button>
             </article>
           )}
         </section>

@@ -103,10 +103,6 @@ header {
   letter-spacing: 0.13em;
   color: #a2b2bd;
 }
-.brand-logo.colliers {
-  font-size: 16px;
-  letter-spacing: -0.04em;
-}
 .header-meta span {
   color: var(--cbre-green-bright);
   padding: 0 7px;
@@ -1373,7 +1369,6 @@ footer {
   .site-nav { margin-left: auto; margin-right: 4px; }
   .site-nav a { padding: 7px; font-size: 0; }
   .site-nav a svg { width: 16px; height: 16px; }
-  .site-nav a.atlas-tab { font-size: 8px; letter-spacing: 0.03em; }
   .site-panel-nav { gap: 3px; }
   .site-panel-nav a {
     padding: 6px 7px;
