@@ -2,7 +2,7 @@
 
 Interactive market-intelligence dashboard for exploring the CBRE research catalog by location, property type, and reporting period.
 
-**Live site:** [coolgithub1.github.io/cbre-market-atlas](https://coolgithub1.github.io/cbre-market-atlas/)
+**Live site:** [coolgithub1.github.io/adam-natsheh](https://coolgithub1.github.io/adam-natsheh/)
 
 ## What it does
 
