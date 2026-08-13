@@ -849,11 +849,27 @@ export default function App() {
           </div>
           {sitePanel === "about" ? (
             <article className="article about-copy">
-              <p className="article-eyebrow">ABOUT ME</p>
-              <h1 id="about-title">Research should make the market easier to read.</h1>
-              <p className="article-lede">I built Market Atlas to make commercial real estate research more discoverable, comparable, and useful for real-world decisions.</p>
-              <p>This site brings market reports into one navigable place. It is designed for people who want to move from scattered PDFs to clearer questions: What is changing? Which data is comparable? What does the evidence actually support?</p>
-              <p>My work focuses on disciplined market research, transparent source use, and the practical details that can change an investment or leasing conclusion.</p>
+              <div className="about-hero">
+                <div>
+                  <p className="article-eyebrow">ABOUT ME</p>
+                  <h1 id="about-title">A global perspective on research, real estate, and hospitality.</h1>
+                  <p className="article-lede">I am Adonis—a researcher and visual communicator with roots across Canada, the United States, Jordan, and Türkiye.</p>
+                </div>
+                <figure className="profile-photo"><img src={`${import.meta.env.BASE_URL}assets/adonis-profile.png`} alt="Adonis in Istanbul" /><figcaption>Istanbul, Türkiye</figcaption></figure>
+              </div>
+              <p>I was born in Québec City and Montreal, Canada, and raised in Lexington, South Carolina. Holding American, Jordanian, and Canadian passports has made international perspective a natural part of how I approach people, places, and opportunities.</p>
+              <p>I speak English, Arabic, and Turkish fluently, with intermediate French. Learning languages is both a personal interest and a practical way of understanding markets and communities beyond their headlines.</p>
+              <h2>Education and direction</h2>
+              <p>I began my studies in economics at Concordia University before moving to Istanbul to support my family’s international work in hospitality and real estate. I later studied Visual Communication Design at Yeditepe University, combining analytical training with an eye for clear storytelling and design.</p>
+              <p>That combination informs Market Atlas: a project built to turn dispersed real estate research into a more accessible, comparable, and decision-ready resource.</p>
+              <div className="about-details" aria-label="Personal profile">
+                <div><span>ROOTS</span><b>Canada · U.S. · Jordan · Türkiye</b></div>
+                <div><span>LANGUAGES</span><b>English · Arabic · Turkish · French</b></div>
+                <div><span>FOCUS</span><b>Hospitality · Real estate · Visual communication</b></div>
+                <div><span>INTERESTS</span><b>Photography · Travel · New languages</b></div>
+              </div>
+              <h2>Beyond the work</h2>
+              <p>Outside of research, I enjoy photography, travelling, and learning new languages. Each one sharpens the same habit that drives my professional work: paying attention to context, asking better questions, and finding a clearer way to share what matters.</p>
               <button className="article-back" onClick={() => navigateSitePage("atlas")}>Explore the atlas</button>
             </article>
           ) : (
