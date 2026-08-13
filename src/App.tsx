@@ -857,9 +857,9 @@ export default function App() {
                 <div>
                   <p className="article-eyebrow">ABOUT ME</p>
                   <h1 id="about-title">A global perspective on research, real estate, and hospitality.</h1>
-                  <p className="article-lede">I am Adonis—a researcher and visual communicator with roots across Canada, the United States, Jordan, and Türkiye.</p>
+                  <p className="article-lede">I am Adam Natsheh—a researcher and visual communicator with roots across Canada, the United States, Jordan, and Türkiye.</p>
                 </div>
-                <figure className="profile-photo"><img src={`${import.meta.env.BASE_URL}assets/adonis-profile.png`} alt="Adonis in Istanbul" /><figcaption>Istanbul, Türkiye</figcaption></figure>
+                <figure className="profile-photo"><img src={`${import.meta.env.BASE_URL}assets/adonis-profile.png`} alt="Adam Natsheh in Istanbul" /><figcaption>Istanbul, Türkiye</figcaption></figure>
               </div>
               <p>I was born in Québec City and Montreal, Canada, and raised in Lexington, South Carolina. Holding American, Jordanian, and Canadian passports has made international perspective a natural part of how I approach people, places, and opportunities.</p>
               <p>I speak English, Arabic, and Turkish fluently, with intermediate French. Learning languages is both a personal interest and a practical way of understanding markets and communities beyond their headlines.</p>
