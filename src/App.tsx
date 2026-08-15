@@ -76,7 +76,7 @@ type DirectFigure = {
   reportTitle: string;
   period: string;
 };
-type SitePage = "about" | "atlas" | "blog" | "blog-charleston" | "blog-charleston-design" | "methodology";
+type SitePage = "about" | "atlas" | "blog" | "blog-charleston" | "blog-charleston-design" | "blog-deederfy" | "methodology";
 const METHODOLOGY_COMPARE = [
   { name: "CBRE", threshold: "10,000+ sf", timing: "Signed lease", signal: "Committed demand", vacancy: "Vacant within 30 days", revision: "Historical series may be revised", position: 24 },
   { name: "Colliers", threshold: "20,000+ sf", timing: "Not disclosed", signal: "Not disclosed", vacancy: "Not disclosed", revision: "Inventory/classification adjusted", position: 50 },
@@ -87,9 +87,10 @@ const currentSitePage = (): SitePage => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
     .replace(/^\/+|\/+$/g, "");
-  if (path === "atlas" || path === "blog" || path === "blog/charleston-q2-2026-methodology" || path === "blog/charleston-q2-2026-design-review" || path === "methodology") {
+  if (path === "atlas" || path === "blog" || path === "blog/charleston-q2-2026-methodology" || path === "blog/charleston-q2-2026-design-review" || path === "blog/deederfy-south-carolina-rod" || path === "methodology") {
     if (path === "blog/charleston-q2-2026-methodology") return "blog-charleston";
     if (path === "blog/charleston-q2-2026-design-review") return "blog-charleston-design";
+    if (path === "blog/deederfy-south-carolina-rod") return "blog-deederfy";
     return path;
   }
   return "about";
@@ -498,7 +499,9 @@ export default function App() {
       ? "blog/charleston-q2-2026-methodology"
       : page === "blog-charleston-design"
         ? "blog/charleston-q2-2026-design-review"
-        : page;
+        : page === "blog-deederfy"
+          ? "blog/deederfy-south-carolina-rod"
+          : page;
     const destination = `${import.meta.env.BASE_URL}${route === "about" ? "" : route}`;
     window.history.pushState({}, "", destination);
     setSitePanel(page);
@@ -523,7 +526,7 @@ export default function App() {
           <a href={`${import.meta.env.BASE_URL}atlas`} className={sitePanel === "atlas" ? "active" : ""} aria-current={sitePanel === "atlas" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>
             Market Atlas
           </a>
-          <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
+          <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" || sitePanel === "blog-deederfy" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" || sitePanel === "blog-deederfy" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
             <BookOpen size={14} /> Blog
           </a>
           <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>
@@ -864,11 +867,11 @@ export default function App() {
       {sitePanel !== "atlas" && (
         <section className="site-panel" aria-labelledby={`${sitePanel}-title`}>
           <div className="site-panel-bar">
-            <span>{sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
+            <span>{sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" || sitePanel === "blog-deederfy" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
             <nav className="site-nav site-panel-nav" aria-label="Site navigation">
               <a href={`${import.meta.env.BASE_URL}`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}><UserRound size={14} /> About me</a>
               <a href={`${import.meta.env.BASE_URL}atlas`} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>Market Atlas</a>
-              <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
+              <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" || sitePanel === "blog-deederfy" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" || sitePanel === "blog-deederfy" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
               <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>Methodology</a>
             </nav>
           </div>
@@ -903,6 +906,10 @@ export default function App() {
               <h1 id="blog-title">My field notes on learning to read commercial real estate data with more context.</h1>
               <p className="article-lede">A personal research journal exploring how CRE markets are measured, compared, and interpreted—from report design and methodology to the assumptions behind every headline number.</p>
               <section className="blog-list" aria-label="Blog posts">
+                <a className="blog-card" href={`${import.meta.env.BASE_URL}blog/deederfy-south-carolina-rod`} onClick={(event) => { event.preventDefault(); navigateSitePage("blog-deederfy"); }}>
+                  <div><p className="article-eyebrow">AUG 2026 · SOUTH CAROLINA · FIELD BUILD</p><h2>The filings were public. The morning read was not.</h2><p>I built a statewide Register of Deeds newsletter because CRE activity in South Carolina was already being recorded—just not arriving in a form anyone could actually use before breakfast.</p></div>
+                  <span>Read note →</span>
+                </a>
                 <a className="blog-card" href={`${import.meta.env.BASE_URL}blog/charleston-q2-2026-methodology`} onClick={(event) => { event.preventDefault(); navigateSitePage("blog-charleston"); }}>
                   <div><p className="article-eyebrow">Q2 2026 · CHARLESTON INDUSTRIAL · METHODOLOGY</p><h2>Four research firms, four ways of measuring one industrial market</h2><p>CBRE, Colliers, Cushman &amp; Wakefield, and JLL may describe the same market, but their survey universes and timing conventions create different headline outcomes.</p></div>
                   <span>Read report →</span>
@@ -912,6 +919,23 @@ export default function App() {
                   <span>Read report →</span>
                 </a>
               </section>
+            </article>
+          ) : sitePanel === "blog-deederfy" ? (
+            <article className="article">
+              <button className="article-crumb" onClick={() => navigateSitePage("blog")}>← All field notes</button>
+              <p className="article-eyebrow">FIELD BUILD / SOUTH CAROLINA / AUG 2026</p>
+              <h1 id="blog-title">The filings were public. The morning read was not.</h1>
+              <p className="article-lede">I built Deederfy to solve a local CRE problem I kept running into: the market was already writing itself down at the courthouse. Nobody was handing me the page.</p>
+              <h2>The gap</h2>
+              <p>In South Carolina, a commercial deal often shows up first as a recording—not a listing, not a press release. The Register of Deeds is the public ledger. The catch is practical. Forty-six counties. Different websites. Guest searches mixed with logins. Deeds sitting next to home mortgages, satisfactions, and routine paperwork. If you work this market, you either sit in an office, pay for a feed, or you hear about the filing after someone else already did.</p>
+              <p>I did not want another dashboard. I wanted a morning habit: what recorded yesterday, statewide, with the commercial signal turned up and the residential clutter turned down.</p>
+              <h2>What I made</h2>
+              <p>Deederfy is a short CRE newsletter. Each morning it reads the counties that publish a usable search, keeps only instruments it has not seen before, and emails one A–Z digest. Residential lot deeds and ordinary home mortgages get summarized as noise. The interesting names—lenders, operators, land, leases, industrial, retail, multifamily—get the page.</p>
+              <p>It does not download document images. It is not a title search. It is a first pass: a way to start the day with the public record instead of waiting for it to be packaged by someone else.</p>
+              <h2>Why it belongs next to the atlas</h2>
+              <p>The Charleston industrial notes on this site are about how brokerage reports measure the same market differently. Deederfy is the other side of that habit. Brokerage research tells you how a market is framed. The deed book tells you what actually closed. Both are public. Neither is useful until someone reads them on purpose.</p>
+              <p>That is the whole project. Not a stack. A field note I wanted to receive, so I built the thing that sends it.</p>
+              <p className="article-source">South Carolina public records may not be used for commercial solicitation (S.C. Code 30-2-50). Deederfy is an independent morning digest, not a county product or a substitute for recorded-document review.</p>
             </article>
           ) : sitePanel === "blog-charleston" ? (
             <article className="article">
