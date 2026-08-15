@@ -982,13 +982,22 @@ export default function App() {
               <p className="article-eyebrow">DESIGN REVIEW / CHARLESTON INDUSTRIAL / Q2 2026</p>
               <h1 id="blog-title">Same data, four very different first impressions</h1>
               <p className="article-lede">A visual review of the Q2 2026 Charleston industrial reports from CBRE, Colliers, Cushman &amp; Wakefield, and JLL—focused on the opening moment and the headline-stat block.</p>
+              <a className="article-download" href={`${import.meta.env.BASE_URL}assets/charleston-industrial-report-design-comparison.pdf`} target="_blank" rel="noreferrer">Download the full PDF report <span aria-hidden="true">↓</span></a>
               <h2>Design shapes the read before the numbers do</h2>
               <p>The firms’ underlying market signals overlap heavily: vacancy sits in the low-to-high teens, absorption is around one million square feet, and asking rents are near $8 per square foot. The reports feel very different because they make the eye move through the page in very different ways.</p>
               <h2>The opening moment: calm versus loud</h2>
               <p>Colliers offers the calmest opening: a dedicated cover with quiet warehouse imagery, deep navy, and generous negative space. CBRE reaches a similarly calm result by omitting photography altogether, using a clean field of white, a mint accent, and restrained typography.</p>
+              <figure className="report-shot">
+                <img src={`${import.meta.env.BASE_URL}assets/charleston-design-opening.jpg`} alt="Report screenshot comparing Colliers' calm cover with CBRE's image-free opening." />
+                <figcaption>Opening-page comparison from the full design review.</figcaption>
+              </figure>
               <p>JLL and Cushman &amp; Wakefield introduce more visual tension. JLL’s Ravenel Bridge banner is an appealing local cue, but its tight crop and overlapping navigation tab compete at first glance. Cushman &amp; Wakefield’s dramatic dusk warehouse image creates an even stronger brand moment, yet it primes the reader to scan quickly just before a dense data block.</p>
               <h2>The headline-stat block: scan path matters</h2>
               <p>CBRE and Colliers make their key performance indicators easy to gather in a single horizontal pass. Their secondary directional icons stay subordinate to the number, so the reader can scan the row like a scoreboard.</p>
+              <figure className="report-shot">
+                <img src={`${import.meta.env.BASE_URL}assets/charleston-design-stat-block.jpg`} alt="Report screenshot showing the CBRE and Colliers horizontal headline-stat rows." />
+                <figcaption>Headline-stat comparison from the full design review.</figcaption>
+              </figure>
               <p>JLL and Cushman &amp; Wakefield use stacked layouts. JLL keeps the format comparatively quiet through ruled rows, a single arrow column, and consistent spacing. Cushman &amp; Wakefield doubles the directional indicators across its fundamentals box, which adds repetition and width without a proportionate gain in meaning.</p>
               <h2>What this suggests for report templates</h2>
               <ul>
@@ -998,7 +1007,8 @@ export default function App() {
               </ul>
               <h2>Overall ranking</h2>
               <ol className="comparison-steps"><li><b>Colliers:</b> the least taxing opening, with a calm cover and a restrained horizontal stat row.</li><li><b>CBRE:</b> fast and clear, if slightly more template-like.</li><li><b>JLL:</b> a clean data table undermined by a visually busy header.</li><li><b>Cushman &amp; Wakefield:</b> the most cinematic opening and the most crowded stat presentation.</li></ol>
-              <p className="article-source">This independent design review draws on the supplied Q2 2026 Charleston industrial reports. <a href={`${import.meta.env.BASE_URL}assets/charleston-industrial-report-design-comparison.pdf`} target="_blank" rel="noreferrer">Download the full design-comparison PDF</a>.</p>
+              <a className="article-download" href={`${import.meta.env.BASE_URL}assets/charleston-industrial-report-design-comparison.pdf`} target="_blank" rel="noreferrer">Download the full PDF report <span aria-hidden="true">↓</span></a>
+              <p className="article-source">This independent design review draws on the supplied Q2 2026 Charleston industrial reports.</p>
             </article>
           ) : (
             <article className="article methodology-page">

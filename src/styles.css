@@ -1348,6 +1348,12 @@ footer {
 .method-grid section { padding: 24px; background: #073326; }
 .method-grid p { margin: 10px 0; font-size: 14px; line-height: 1.55; }
 .article-source { margin-top: 42px; padding-top: 18px; border-top: 1px solid rgba(142, 231, 181, 0.25); color: #8ca99c !important; font-size: 12px !important; }
+.article-download { display: inline-flex; align-items: center; gap: 10px; margin: 4px 0 11px; padding: 12px 15px; border: 1px solid #65c890; background: rgba(0, 166, 90, 0.14); color: #d9ffe8; font: 700 10px "DM Mono"; letter-spacing: 0.07em; text-decoration: none; text-transform: uppercase; }
+.article-download:hover { background: rgba(0, 166, 90, 0.28); color: #fff; }
+.article-download span { color: #8ee7b5; font-size: 16px; line-height: 0; }
+.report-shot { margin: 28px 0 30px; padding: 10px; border: 1px solid rgba(142, 231, 181, 0.3); background: #e7eee9; }
+.report-shot img { display: block; width: 100%; height: auto; }
+.report-shot figcaption { padding: 10px 4px 2px; color: #486357; font: 10px "DM Mono"; letter-spacing: 0.04em; }
 .article-back { margin-top: 22px; padding: 10px 13px; border: 1px solid #4f9872; color: #bff3d5; font: 10px "DM Mono"; letter-spacing: 0.07em; text-transform: uppercase; }
 .article-back:hover { background: rgba(0, 166, 90, 0.16); }
 @media (max-width: 760px) {
