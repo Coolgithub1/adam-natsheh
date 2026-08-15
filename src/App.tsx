@@ -76,7 +76,7 @@ type DirectFigure = {
   reportTitle: string;
   period: string;
 };
-type SitePage = "about" | "atlas" | "blog" | "blog-charleston" | "methodology";
+type SitePage = "about" | "atlas" | "blog" | "blog-charleston" | "blog-charleston-design" | "methodology";
 const METHODOLOGY_COMPARE = [
   { name: "CBRE", threshold: "10,000+ sf", timing: "Signed lease", signal: "Committed demand", vacancy: "Vacant within 30 days", revision: "Historical series may be revised", position: 24 },
   { name: "Colliers", threshold: "20,000+ sf", timing: "Not disclosed", signal: "Not disclosed", vacancy: "Not disclosed", revision: "Inventory/classification adjusted", position: 50 },
@@ -87,8 +87,10 @@ const currentSitePage = (): SitePage => {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   const path = (new URLSearchParams(window.location.search).get("route") ?? window.location.pathname.replace(base, ""))
     .replace(/^\/+|\/+$/g, "");
-  if (path === "atlas" || path === "blog" || path === "blog/charleston-q2-2026-methodology" || path === "methodology") {
-    return path === "blog/charleston-q2-2026-methodology" ? "blog-charleston" : path;
+  if (path === "atlas" || path === "blog" || path === "blog/charleston-q2-2026-methodology" || path === "blog/charleston-q2-2026-design-review" || path === "methodology") {
+    if (path === "blog/charleston-q2-2026-methodology") return "blog-charleston";
+    if (path === "blog/charleston-q2-2026-design-review") return "blog-charleston-design";
+    return path;
   }
   return "about";
 };
@@ -492,7 +494,11 @@ export default function App() {
     setSavedViews((current) => [...current, { name: name.trim(), region, sector, month, query, period }]);
   };
   const navigateSitePage = (page: SitePage) => {
-    const route = page === "blog-charleston" ? "blog/charleston-q2-2026-methodology" : page;
+    const route = page === "blog-charleston"
+      ? "blog/charleston-q2-2026-methodology"
+      : page === "blog-charleston-design"
+        ? "blog/charleston-q2-2026-design-review"
+        : page;
     const destination = `${import.meta.env.BASE_URL}${route === "about" ? "" : route}`;
     window.history.pushState({}, "", destination);
     setSitePanel(page);
@@ -517,7 +523,7 @@ export default function App() {
           <a href={`${import.meta.env.BASE_URL}atlas`} className={sitePanel === "atlas" ? "active" : ""} aria-current={sitePanel === "atlas" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>
             Market Atlas
           </a>
-          <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
+          <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}>
             <BookOpen size={14} /> Blog
           </a>
           <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>
@@ -858,11 +864,11 @@ export default function App() {
       {sitePanel !== "atlas" && (
         <section className="site-panel" aria-labelledby={`${sitePanel}-title`}>
           <div className="site-panel-bar">
-            <span>{sitePanel === "blog" || sitePanel === "blog-charleston" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
+            <span>{sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "MARKET ATLAS / FIELD NOTES" : sitePanel === "methodology" ? "MARKET ATLAS / TECHNICAL NOTE" : "MARKET ATLAS / ABOUT"}</span>
             <nav className="site-nav site-panel-nav" aria-label="Site navigation">
               <a href={`${import.meta.env.BASE_URL}`} className={sitePanel === "about" ? "active" : ""} aria-current={sitePanel === "about" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("about"); }}><UserRound size={14} /> About me</a>
               <a href={`${import.meta.env.BASE_URL}atlas`} onClick={(event) => { event.preventDefault(); navigateSitePage("atlas"); }}>Market Atlas</a>
-              <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
+              <a href={`${import.meta.env.BASE_URL}blog`} className={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "active" : ""} aria-current={sitePanel === "blog" || sitePanel === "blog-charleston" || sitePanel === "blog-charleston-design" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("blog"); }}><BookOpen size={14} /> Blog</a>
               <a href={`${import.meta.env.BASE_URL}methodology`} className={sitePanel === "methodology" ? "active" : ""} aria-current={sitePanel === "methodology" ? "page" : undefined} onClick={(event) => { event.preventDefault(); navigateSitePage("methodology"); }}>Methodology</a>
             </nav>
           </div>
@@ -899,6 +905,10 @@ export default function App() {
               <section className="blog-list" aria-label="Blog posts">
                 <a className="blog-card" href={`${import.meta.env.BASE_URL}blog/charleston-q2-2026-methodology`} onClick={(event) => { event.preventDefault(); navigateSitePage("blog-charleston"); }}>
                   <div><p className="article-eyebrow">Q2 2026 · CHARLESTON INDUSTRIAL · METHODOLOGY</p><h2>Four research firms, four ways of measuring one industrial market</h2><p>CBRE, Colliers, Cushman &amp; Wakefield, and JLL may describe the same market, but their survey universes and timing conventions create different headline outcomes.</p></div>
+                  <span>Read report →</span>
+                </a>
+                <a className="blog-card" href={`${import.meta.env.BASE_URL}blog/charleston-q2-2026-design-review`} onClick={(event) => { event.preventDefault(); navigateSitePage("blog-charleston-design"); }}>
+                  <div><p className="article-eyebrow">Q2 2026 · CHARLESTON INDUSTRIAL · DESIGN REVIEW</p><h2>Same data, four very different first impressions</h2><p>CBRE, Colliers, Cushman &amp; Wakefield, and JLL all surface similar market signals. This review examines how their opening pages and headline stat blocks change the reading experience.</p></div>
                   <span>Read report →</span>
                 </a>
               </section>
@@ -965,6 +975,30 @@ export default function App() {
               <h2>The takeaway</h2>
               <p>The best practice is to compare each firm's trend with its own historical series, then reconcile definitions before comparing firms. A strong conclusion needs a like-for-like inventory universe, matching timing conventions, and clarity on whether the metric represents a signed commitment, available space, or occupied space.</p>
               <p className="article-source">Methodology notes are drawn from the firms' supplied Q2 2026 Charleston industrial reports. This article is an independent comparison, not a reproduction of their research.</p>
+            </article>
+          ) : sitePanel === "blog-charleston-design" ? (
+            <article className="article">
+              <button className="article-crumb" onClick={() => navigateSitePage("blog")}>← All field notes</button>
+              <p className="article-eyebrow">DESIGN REVIEW / CHARLESTON INDUSTRIAL / Q2 2026</p>
+              <h1 id="blog-title">Same data, four very different first impressions</h1>
+              <p className="article-lede">A visual review of the Q2 2026 Charleston industrial reports from CBRE, Colliers, Cushman &amp; Wakefield, and JLL—focused on the opening moment and the headline-stat block.</p>
+              <h2>Design shapes the read before the numbers do</h2>
+              <p>The firms’ underlying market signals overlap heavily: vacancy sits in the low-to-high teens, absorption is around one million square feet, and asking rents are near $8 per square foot. The reports feel very different because they make the eye move through the page in very different ways.</p>
+              <h2>The opening moment: calm versus loud</h2>
+              <p>Colliers offers the calmest opening: a dedicated cover with quiet warehouse imagery, deep navy, and generous negative space. CBRE reaches a similarly calm result by omitting photography altogether, using a clean field of white, a mint accent, and restrained typography.</p>
+              <p>JLL and Cushman &amp; Wakefield introduce more visual tension. JLL’s Ravenel Bridge banner is an appealing local cue, but its tight crop and overlapping navigation tab compete at first glance. Cushman &amp; Wakefield’s dramatic dusk warehouse image creates an even stronger brand moment, yet it primes the reader to scan quickly just before a dense data block.</p>
+              <h2>The headline-stat block: scan path matters</h2>
+              <p>CBRE and Colliers make their key performance indicators easy to gather in a single horizontal pass. Their secondary directional icons stay subordinate to the number, so the reader can scan the row like a scoreboard.</p>
+              <p>JLL and Cushman &amp; Wakefield use stacked layouts. JLL keeps the format comparatively quiet through ruled rows, a single arrow column, and consistent spacing. Cushman &amp; Wakefield doubles the directional indicators across its fundamentals box, which adds repetition and width without a proportionate gain in meaning.</p>
+              <h2>What this suggests for report templates</h2>
+              <ul>
+                <li><b>Use one directional signal per metric.</b> When year-over-year change and outlook both matter, combine them with a color code, glyph, or compact sparkline rather than duplicate arrows.</li>
+                <li><b>Match whitespace to image weight.</b> Dramatic imagery needs room before the reader reaches data; quiet imagery and image-free headers can support a more generous, focused opening.</li>
+                <li><b>Use horizontal KPI rows for short lists.</b> A single-line scorecard is easier to scan for four or five metrics. Reserve vertical tables for longer lists.</li>
+              </ul>
+              <h2>Overall ranking</h2>
+              <ol className="comparison-steps"><li><b>Colliers:</b> the least taxing opening, with a calm cover and a restrained horizontal stat row.</li><li><b>CBRE:</b> fast and clear, if slightly more template-like.</li><li><b>JLL:</b> a clean data table undermined by a visually busy header.</li><li><b>Cushman &amp; Wakefield:</b> the most cinematic opening and the most crowded stat presentation.</li></ol>
+              <p className="article-source">This independent design review draws on the supplied Q2 2026 Charleston industrial reports. <a href={`${import.meta.env.BASE_URL}assets/charleston-industrial-report-design-comparison.pdf`} target="_blank" rel="noreferrer">Download the full design-comparison PDF</a>.</p>
             </article>
           ) : (
             <article className="article methodology-page">
