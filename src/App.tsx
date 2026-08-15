@@ -900,8 +900,8 @@ export default function App() {
           ) : sitePanel === "blog" ? (
             <article className="article blog-index">
               <p className="article-eyebrow">FIELD NOTES</p>
-              <h1 id="blog-title">Research notes for reading commercial real estate data with more context.</h1>
-              <p className="article-lede">A collection of report comparisons, methodology notes, and market-research observations from Market Atlas.</p>
+              <h1 id="blog-title">My field notes on learning to read commercial real estate data with more context.</h1>
+              <p className="article-lede">A personal research journal exploring how CRE markets are measured, compared, and interpreted—from report design and methodology to the assumptions behind every headline number.</p>
               <section className="blog-list" aria-label="Blog posts">
                 <a className="blog-card" href={`${import.meta.env.BASE_URL}blog/charleston-q2-2026-methodology`} onClick={(event) => { event.preventDefault(); navigateSitePage("blog-charleston"); }}>
                   <div><p className="article-eyebrow">Q2 2026 · CHARLESTON INDUSTRIAL · METHODOLOGY</p><h2>Four research firms, four ways of measuring one industrial market</h2><p>CBRE, Colliers, Cushman &amp; Wakefield, and JLL may describe the same market, but their survey universes and timing conventions create different headline outcomes.</p></div>
